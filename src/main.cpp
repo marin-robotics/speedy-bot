@@ -23,12 +23,7 @@ void move_right(int speed) {
 	right_mtr_2 = speed;
 }
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
+int controller_reversed = 1;
 void on_center_button() {
 	static bool pressed = false;
 	pressed = !pressed;
@@ -118,8 +113,21 @@ void autonomous() {
 void opcontrol() {
 	bool holding_cube = false;
 	while (true) {
-		move_left(master.get_analog(ANALOG_LEFT_Y));
-		move_right(master.get_analog(ANALOG_RIGHT_Y));
+		if (master.get_digital(DIGITAL_A))
+		{
+			controller_reversed *= -1;
+		}
+
+		if (controller_reversed == -1)
+		{
+			move_left(master.get_analog(ANALOG_RIGHT_Y) * controller_reversed);
+			move_right(master.get_analog(ANALOG_LEFT_Y) * controller_reversed);
+		}
+		else
+		{
+			move_left(master.get_analog(ANALOG_LEFT_Y));
+			move_right(master.get_analog(ANALOG_RIGHT_Y));
+		}
 
 		if (master.get_digital(DIGITAL_L1)) {
 			lift_mtr = 127;
